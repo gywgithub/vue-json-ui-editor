@@ -6,9 +6,20 @@
   "properties": {
     "name": {
       "type": "string",
-      "minLength": 8,
+      "minLength": 6,
       "maxLength": 80,
       "title": "String",
+      "attrs": {
+        "placeholder": "Your Full Name",
+        "title": "Please enter your full name"
+      }
+    },
+    "age": {
+      "type": "integer",
+      "title": "age",
+      "default": 25,
+      "minimum": 18,
+      "maximum": 99,
       "attrs": {
         "placeholder": "Your Full Name",
         "title": "Please enter your full name"

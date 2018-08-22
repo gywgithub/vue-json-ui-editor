@@ -39,6 +39,58 @@ JsonEditor.setComponent('form', 'el-form', ({ vm }) => {
   const labelWidth = '120px';
   const model = vm.data;
   const rules = {};
+  console.log('vm')
+  console.log(vm)
+  let propertiesObject = vm.schema.properties
+  console.log('propertiesObject')
+  console.log(propertiesObject)
+  // function parseField(fields) {
+  //   console.log(0)
+  //   console.log(fields)
+  //   Object.keys(fields).forEach(key => {
+  //     // console.log(1)
+  //     // console.log(key)
+  //     // console.log(2)
+  //     if (key.indexOf('$') === 0 && key !== '$sub') return;
+  //     const field = fields[key];
+  //     if (field.$sub) {
+  //       return parseField(field);
+  //     }
+  //     if (!field.name) return;
+  //     rules[field.name] = [];
+  //     // http://element.eleme.io/#/en-US/component/form#validation
+  //     const type = field.schemaType === 'array' && field.type === 'radio' ? 'string' : field.schemaType;
+  //     const required = field.required;
+  //     const message = field.title;
+  //     const trigger = ['radio', 'checkbox', 'select', 'number'].includes(field.type) ? 'change' : 'blur';
+  //     // console.log('type')
+  //     // console.log(type)
+  //     console.log('required')
+  //     console.log(required)
+  //     console.log('message')
+  //     console.log(message)
+  //     console.log('trigger')
+  //     console.log(trigger)
+  //     rules[field.name].push({ type, required, message, trigger });
+  //     console.log('f')
+  //     console.log(field)
+  //     if (field.minlength !== undefined || field.maxlength !== undefined) {
+  //       const max = field.maxlength || 255;
+  //       const min = field.minlength || 0;
+  //       const msg = `Length must between ${ min } and ${ max }`;
+  //       rules[field.name].push({ min, max, message: msg, trigger });
+  //     }
+  //
+  //     if (field.minimum !== undefined) {
+  //       console.log('ninmum')
+  //       console.log('schema type')
+  //       console.log(field.schemaType)
+  //     }
+  //   });
+  // }
+  //
+  // parseField(vm.fields);
+
 
   function parseField(fields) {
     Object.keys(fields).forEach(key => {
@@ -49,18 +101,38 @@ JsonEditor.setComponent('form', 'el-form', ({ vm }) => {
       }
       if (!field.name) return;
       rules[field.name] = [];
-      // http://element.eleme.io/#/en-US/component/form#validation
       const type = field.schemaType === 'array' && field.type === 'radio' ? 'string' : field.schemaType;
       const required = field.required;
       const message = field.title;
-      const trigger = ['radio', 'checkbox', 'select'].includes(field.type) ? 'change' : 'blur';
+      const trigger = ['radio', 'checkbox', 'select', 'number'].includes(field.type) ? 'change' : 'blur';
       rules[field.name].push({ type, required, message, trigger });
-
       if (field.minlength !== undefined || field.maxlength !== undefined) {
         const max = field.maxlength || 255;
         const min = field.minlength || 0;
         const msg = `Length must between ${ min } and ${ max }`;
         rules[field.name].push({ min, max, message: msg, trigger });
+      }
+
+      if (field.type === 'number') {
+        let name = field.name
+        let value = propertiesObject[name]
+        let val = vm.data[name]
+        if (value.maximum === undefined && value.minimum === undefined) {
+          return true
+        } else if (value.maximum !== undefined && value.minimum === undefined && val > value.maximum) {
+          const max = value.maximum;
+          const msg = `The maximum value must be less than ${ max }`;
+          rules[field.name].push({ max, message: msg, trigger });
+        } else if (value.minimum !== undefined && value.maximum === undefined && val < value.minimum) {
+          const min = value.minimum;
+          const msg = `The minimum value must be greater than ${ min }`;
+          rules[field.name].push({ min, message: msg, trigger });
+        } else if ((value.maximum !== undefined && val > value.maximum) || (value.minimum !== undefined && val < value.minimum)) {
+          const max = value.maximum;
+          const min = value.minimum;
+          const msg = `The maximum or minimum must between ${ min } and ${ max }`;
+          rules[field.name].push({ min, max, message: msg, trigger });
+        }
       }
     });
   }
@@ -109,12 +181,8 @@ JsonEditor.setComponent('error', 'el-alert', ({ vm }) => ({
 
 export default {
   data: () => ({
-    schema: require('@/schema/newsletter'),
+    schema: require('@/schema/1'),
     model: {
-      name: 'Yourtion',
-      sub: {
-        sEmail: 'yourtion@gmail.com',
-      },
     },
   }),
   computed: {
@@ -125,6 +193,8 @@ export default {
   methods: {
     submit(_e) {
       this.$refs.JsonEditor.form().validate(valid => {
+        console.log('valid')
+        console.log(valid)
         if (valid) {
           // this.model contains the valid data according your JSON Schema.
           // You can submit your model to the server here
