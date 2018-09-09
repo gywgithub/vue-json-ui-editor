@@ -9,8 +9,26 @@
       "title": "age",
       "default": 25,
       "maximum": 118
+    },
+    "tag": {
+      "type": "string",
+      "title": "tag"
+    },
+    "mode": {
+      "type": "string",
+      "title": "mode",
+      "enum": ["classification", "regression"],
+      "attrs": {
+        "placeholder": "Select your list subscription",
+        "title": "Please select your list subscription"
+      }
+    },
+    "m1": {
+      "type": "array",
+      "title": "m1",
+      "anyOf": []
     }
   },
-  "additionalProperties": true,
-  "required": ["name", "age", "lists"]
+  "additionalProperties": false,
+  "required": ["age", "mode", "tag"]
 }
