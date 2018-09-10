@@ -1,8 +1,9 @@
 <template>
 <el-row>
   <el-col :span="12">
+    <el-input v-model="input.name"></el-input>
     <el-card class="form">
-      <json-editor ref="JsonEditor" :schema="schema" v-model="model">
+      <json-editor ref="JsonEditor" :schema="schema" v-model="model" v-if="show">
         <el-button type="primary" @click="submit" style="display:none;">Subscribe</el-button>
         <el-button type="reset" @click="reset">Reset</el-button>
       </json-editor>
@@ -34,15 +35,87 @@
 import JsonEditor from '../../src/JsonEditor.vue';
 import { Option } from 'element-ui';
 // let schema = require('@/schema/1');
+import schema from '@/schema/1' 
+import { setTimeout } from 'timers';
+// console.log(1)
+// let schema = require('./schema/1.json')
+// console.log(schema)
 
 export default {
   data: () => ({
-    schema: require('@/schema/1'),
-    // schema: null,
+    // schema: require('@/schema/1'),
+    schema: null,
     // schema: require('@/schema/newsletter.json'),
     model: {},
     m1: [{ value: 'daily', label: 'Daily New' }, { value: 'promotion', label: 'Promotion' }],
+    show: false,
+    input: {
+      name: ''
+    },
+    oldValue: ''
   }),
+  watch: {
+    model: {
+      handler: function (val) {
+        // console.log('val')
+        console.log(val)
+        // console.log(v2)
+        // console.log('m')
+        // console.log(this.schema)
+        console.log('model 1')
+        console.log(this.model)
+        if (this.model.mode !== '' && this.model.mode !== sessionStorage.getItem('model')) {
+          console.log('2222')
+          sessionStorage.setItem('model', this.model.mode)
+          this.$emit('changeSchema')
+          // console.log('001')  
+          // this.schema.properties.m1.anyOf = this.m1
+          // console.log('new schema')
+          // console.log(this.schema)
+          // let newSchema = JSON.stringify(this.schema)
+          // this.mode = {}
+          // this.show = false
+          // // this.schema = null
+          // console.log('----------------')
+          // console.log(this.schema)
+          // console.log(newSchema)
+          // console.log('3')
+          
+          // console.log('4')
+          
+          // setTimeout(() => {
+
+            // this.schema = JSON.parse(newSchema)
+            // this.show = true
+            // this.init();
+            // console.log('1')
+            // this.schema.properties.m1.anyOf = this.m1
+            // console.log('new schema')
+            // console.log(this.schema)
+            // this.schema = JSON.parse(newSchema)
+            // console.log('schema')
+            // console.log(this.schema)
+            // this.show = true
+            // this.show = true
+            // console.log('49499')
+            // this.init();
+            // console.log('33333')
+          // }, 2000)
+        } else {
+          console.log('002')
+        }
+      },
+      deep: true
+    },
+    input: {
+      handler: function (newVal, oldVal) {
+        console.log('input')
+        console.log(newVal)
+        console.log(oldVal)
+      },
+      deep: true
+    }
+  },
   computed: {
     jsonString() {
       return JSON.stringify(this.model, null, 2).trim();
@@ -51,14 +124,14 @@ export default {
   methods: {
     submit(_e) {
       this.$refs.JsonEditor.form().validate(valid => {
-        console.log('valid');
-        console.log(valid);
+        // console.log('valid');
+        // console.log(valid);
         if (valid) {
           // this.model contains the valid data according your JSON Schema.
           // You can submit your model to the server here
 
           // eslint-disable-next-line no-console
-          console.log('model', JSON.stringify(this.model));
+          // console.log('model', JSON.stringify(this.model));
           this.$refs.JsonEditor.clearErrorMessage();
         } else {
           this.$refs.JsonEditor.setErrorMessage('Please fill out the required fields');
@@ -81,12 +154,12 @@ export default {
         const labelWidth = '120px';
         const model = vm.data;
         const rules = {};
-        console.log('vm');
-        console.log(vm);
+        // console.log('vm');
+        // console.log(vm);
         let propertiesObject = vm.schema.properties;
-        console.log('propertiesObject');
-        console.log(propertiesObject);
-        console.log('2')
+        // console.log('propertiesObject');
+        // console.log(propertiesObject);
+        // console.log('2')
         function parseField(fields) {
           Object.keys(fields).forEach(key => {
             if (key.indexOf('$') === 0 && key !== '$sub') return;
@@ -106,11 +179,6 @@ export default {
               const min = field.minlength || 0;
               const msg = `Length must between ${min} and ${max}`;
               rules[field.name].push({ min, max, message: msg, trigger });
-            }
-
-            if (field.type === 'select' && vm.data.model) {
-              console.log('1');
-              console.log(vm.data);
             }
 
             if (field.type === 'number') {
@@ -141,7 +209,10 @@ export default {
         }
 
         parseField(vm.fields);
-
+        // console.log('vm fields')
+        // console.log(vm.fields)
+        // console.log('return result')
+        // console.log({ labelWidth, rules, model })
         // returning the form props
         return { labelWidth, rules, model };
       });
@@ -186,11 +257,25 @@ export default {
   },
   mounted() {
     console.log('mounted');
-    console.log();
+    // console.log();
+    // console.log(schema)
+    
     // this.schema = schema;
+    this.schema = JSON.parse(sessionStorage.getItem('schema'))
+    console.log('s1')
     console.log(this.schema);
+    console.log('s2')
+    this.show = true
     // this.reset();
+    if (sessionStorage.getItem('model')) {
+      console.log('s3')
+      this.model.mode = sessionStorage.getItem('model')
+    }
+    console.log('s4')
     this.init();
+  },
+  destoryed () {
+    sessionStorage.removeItem('schema')
   },
   components: { JsonEditor },
 };
